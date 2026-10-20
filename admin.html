@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090c18">
+  <title>Admin Panel | NOVA MARKET</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="admin-body">
+
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <a class="brand admin-brand" href="admin.html">
+        <span class="brand-mark">N</span>
+        <span>NOVA <small>ADMIN</small></span>
+      </a>
+
+      <div class="admin-profile">
+        <div class="admin-avatar">A</div>
+        <div>
+          <strong>Administrator</strong>
+          <span id="admin-role-label">جاري التحقق...</span>
+        </div>
+      </div>
+
+      <nav class="admin-nav" aria-label="قائمة الإدارة">
+        <button type="button" class="active" data-admin-section="overview">
+          <span>▦</span> لوحة المعلومات
+        </button>
+
+        <button type="button" data-admin-section="users">
+          <span>♙</span> المستخدمون
+        </button>
+
+        <button type="button" data-admin-section="listings">
+          <span>▣</span> الإعلانات
+        </button>
+
+        <button type="button" data-admin-section="orders">
+          <span>🛒</span> الطلبات
+        </button>
+
+        <button type="button" data-admin-section="logs">
+          <span>◷</span> سجل الأنشطة
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-bottom">
+        <a href="index.html">← الرجوع للسوق</a>
+        <button type="button" data-theme-toggle>🌙 / ☀️ المظهر</button>
+        <button type="button" data-signout>تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+
+      <header class="admin-topbar">
+        <div>
+          <p class="admin-eyebrow">NOVA MARKET / CONTROL CENTER</p>
+          <h1 id="admin-page-title">لوحة المعلومات</h1>
+          <p class="muted">تسيير ومراقبة المنصة من مكان واحد.</p>
+        </div>
+
+        <button type="button" id="admin-refresh" class="admin-refresh">
+          ↻ تحديث البيانات
+        </button>
+      </header>
+
+      <div id="admin-notice" class="admin-notice" role="status"
+           aria-live="polite" hidden></div>
+
+      <!-- OVERVIEW -->
+      <section class="admin-section active" id="section-overview">
+
+        <div class="admin-welcome">
+          <div>
+            <span class="admin-welcome-tag">ADMIN CONTROL CENTER</span>
+            <h2>مرحبا بك في NOVA MARKET</h2>
+            <p>تابع نشاط السوق، المستخدمين والإعلانات والطلبات.</p>
+          </div>
+          <div class="admin-welcome-symbol">N</div>
+        </div>
+
+        <div class="admin-stat-grid">
+          <article class="admin-stat-card">
+            <span class="admin-stat-icon">♙</span>
+            <span class="admin-stat-label">المستخدمون</span>
+            <strong id="stat-users">—</strong>
+            <small>الحسابات المسجلة</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span class="admin-stat-icon">▣</span>
+            <span class="admin-stat-label">الإعلانات النشطة</span>
+            <strong id="stat-listings">—</strong>
+            <small>المنتجات والخدمات</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span class="admin-stat-icon">🛒</span>
+            <span class="admin-stat-label">الطلبات</span>
+            <strong id="stat-orders">—</strong>
+            <small>إجمالي الطلبات</small>
+          </article>
+
+          <article class="admin-stat-card">
+            <span class="admin-stat-icon">✓</span>
+            <span class="admin-stat-label">الطلبات المكتملة</span>
+            <strong id="stat-completed">—</strong>
+            <small>الطلبات المنتهية</small>
+          </article>
+        </div>
+
+        <div class="admin-content-grid">
+          <article class="admin-panel">
+            <div class="admin-panel-heading">
+              <div>
+                <h3>آخر الإعلانات</h3>
+                <p>أحدث المنتجات والخدمات المنشورة</p>
+              </div>
+              <button type="button" data-admin-section="listings">
+                عرض الكل
+              </button>
+            </div>
+            <div id="overview-listings" class="admin-table-wrap">
+              <p class="muted">كنحمّلو البيانات...</p>
+            </div>
+          </article>
+
+          <article class="admin-panel">
+            <div class="admin-panel-heading">
+              <div>
+                <h3>آخر الطلبات</h3>
+                <p>آخر العمليات المسجلة</p>
+              </div>
+              <button type="button" data-admin-section="orders">
+                عرض الكل
+              </button>
+            </div>
+            <div id="overview-orders" class="admin-recent-list">
+              <p class="muted">كنحمّلو البيانات...</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section class="admin-section" id="section-users">
+        <div class="admin-panel">
+          <div class="admin-panel-heading">
+            <div>
+              <h2>إدارة المستخدمين</h2>
+              <p>عرض الحسابات المسجلة والأدوار.</p>
+            </div>
+          </div>
+
+          <input
+            type="search"
+            id="admin-users-search"
+            class="admin-search"
+            placeholder="قلب بالاسم أو معرّف الحساب..."
+            aria-label="البحث عن المستخدمين"
+          >
+
+          <div id="admin-users-table" class="admin-table-wrap">
+            <p class="muted">كنحمّلو المستخدمين...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTINGS -->
+      <section class="admin-section" id="section-listings">
+        <div class="admin-panel">
+          <div class="admin-panel-heading">
+            <div>
+              <h2>إدارة الإعلانات</h2>
+              <p>مراقبة المنتجات والخدمات المنشورة.</p>
+            </div>
+          </div>
+
+          <input
+            type="search"
+            id="admin-listings-search"
+            class="admin-search"
+            placeholder="قلب على إعلان..."
+            aria-label="البحث عن الإعلانات"
+          >
+
+          <div id="admin-listings-table" class="admin-table-wrap">
+            <p class="muted">كنحمّلو الإعلانات...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="admin-section" id="section-orders">
+        <div class="admin-panel">
+          <div class="admin-panel-heading">
+            <div>
+              <h2>إدارة الطلبات</h2>
+              <p>عرض الطلبات وحالاتها.</p>
+            </div>
+          </div>
+
+          <div class="admin-filter-row">
+            <input
+              type="search"
+              id="admin-orders-search"
+              class="admin-search"
+              placeholder="قلب برقم الطلب أو المعرّف..."
+              aria-label="البحث عن الطلبات"
+            >
+
+            <select id="admin-orders-status">
+              <option value="all">جميع الحالات</option>
+              <option value="pending">في الانتظار</option>
+              <option value="paid">تم الأداء</option>
+              <option value="in_progress">قيد التنفيذ</option>
+              <option value="delivered">تم التسليم</option>
+              <option value="completed">مكتمل</option>
+              <option value="cancelled">ملغى</option>
+              <option value="disputed">نزاع</option>
+              <option value="refunded">مسترجع</option>
+            </select>
+          </div>
+
+          <div id="admin-orders-table" class="admin-table-wrap">
+            <p class="muted">كنحمّلو الطلبات...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUDIT LOGS -->
+      <section class="admin-section" id="section-logs">
+        <div class="admin-panel">
+          <div class="admin-panel-heading">
+            <div>
+              <h2>سجل الأنشطة</h2>
+              <p>العمليات الإدارية المسجلة داخل المنصة.</p>
+            </div>
+          </div>
+
+          <div id="admin-logs-table" class="admin-table-wrap">
+            <p class="muted">كنحمّلو سجل الأنشطة...</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="admin-footer">
+        NOVA MARKET · Admin Control Center
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
