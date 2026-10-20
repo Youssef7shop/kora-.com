@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المحادثات | NOVA MARKET</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ <script src="js/supabase-config.js"></script>
+ <script src="js/supabase-client.js"></script>
+ <script src="js/common.js"></script>
+ <script src="js/messages.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        NOVA MARKET
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">السوق</a>
+        <a href="dashboard.html">لوحة التحكم</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="button" type="button" data-theme-toggle>◐</button>
+        <button class="button" type="button" data-signout>خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section>
+      <h1>المحادثات</h1>
+      <p class="muted">تواصل مع البائعين والمشترين من هنا.</p>
+      <p id="messages-notice" role="status" aria-live="polite"></p>
+
+      <div class="messages-layout">
+        <aside class="conversation-list">
+          <div class="chat-header">المحادثات ديالي</div>
+          <div id="conversation-list">
+            <p class="muted" style="padding:16px">كنحمّلو المحادثات...</p>
+          </div>
+        </aside>
+
+        <section class="chat-panel">
+          <div class="chat-header" id="chat-title">
+            اختار محادثة
+          </div>
+
+          <div
+            id="chat-messages"
+            class="chat-messages"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              اختار محادثة من اللائحة باش تشوف الرسائل.
+            </div>
+          </div>
+
+          <form id="message-form" class="chat-form">
+            <input
+              id="message-input"
+              name="message"
+              maxlength="3000"
+              placeholder="كتب الرسالة ديالك..."
+              autocomplete="off"
+              aria-label="الرسالة"
+              required
+            >
+            <button class="button button-primary" type="submit">
+              إرسال
+            </button>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© NOVA MARKET</div>
+  </footer>
+
+  <div id="notice" class="notice" role="status"></div>
+</body>
+</html>
