@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NOVA MARKET - سوق المنتجات والخدمات الرقمية">
+  <title>NOVA MARKET | السوق ديالك</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script defer src="js/common.js"></script>
+  <script defer src="js/market.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        NOVA MARKET
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">الرئيسية</a>
+        <a href="#market">السوق</a>
+        <a href="dashboard.html">بيع منتج</a>
+        <a href="messages.html">المحادثات</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="button" data-theme-toggle>◐</button>
+        <a class="button" href="login.html">دخول</a>
+        <a class="button button-primary" href="register.html">
+          إنشاء حساب
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">✦ سوق واحد، فرص بلا حدود</span>
+
+        <h1>
+          لقا اللي بغيتي.<br>
+          <span class="gradient-text">بيع اللي عندك.</span>
+        </h1>
+
+        <p>
+          اكتشف المنتجات والخدمات الرقمية، قارن الأثمنة،
+          وتواصل مباشرة مع البائعين من أي مكان فالمغرب.
+        </p>
+
+        <div class="nav-actions">
+          <a class="button button-primary" href="#market">
+            اكتشف السوق
+          </a>
+          <a class="button" href="dashboard.html">
+            + نشر إعلان
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <div class="hero-symbol">NOVA</div>
+      </div>
+    </section>
+
+    <section id="market">
+      <div class="section-head">
+        <div>
+          <h2>اكتشف السوق</h2>
+          <p class="muted">
+            منتجات وخدمات معروضة من طرف البائعين
+          </p>
+        </div>
+      </div>
+
+      <div class="searchbar">
+        <input
+          id="search"
+          type="search"
+          placeholder="قلب على منتج أو خدمة..."
+          aria-label="البحث"
+        >
+
+        <button
+          class="button button-primary"
+          onclick="document.querySelector('#search').focus()"
+        >
+          بحث
+        </button>
+      </div>
+
+      <div class="filters">
+        <select id="kind-filter" aria-label="نوع الإعلان">
+          <option value="all">جميع الإعلانات</option>
+          <option value="product">المنتجات</option>
+          <option value="service">الخدمات الرقمية</option>
+        </select>
+
+        <select id="category-filter" aria-label="التصنيف">
+          <option value="">جميع التصنيفات</option>
+          <option value="إلكترونيات">إلكترونيات</option>
+          <option value="ملابس">ملابس</option>
+          <option value="المنزل">المنزل</option>
+          <option value="تصميم وبرمجة">تصميم وبرمجة</option>
+          <option value="تسويق رقمي">تسويق رقمي</option>
+          <option value="تعليم">تعليم</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
+
+      <div id="listing-grid" class="listing-grid">
+        <p class="muted">كنحمّلو الإعلانات...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong>NOVA MARKET</strong>
+      <p>المنتجات والخدمات الرقمية في مكان واحد.</p>
+      <p>تأكد من معلومات البائع قبل إتمام أي معاملة.</p>
+    </div>
+  </footer>
+
+  <div id="notice" class="notice" role="status"></div>
+</body>
+</html>

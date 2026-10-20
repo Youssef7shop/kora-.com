@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول | NOVA MARKET</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script defer src="js/common.js"></script>
+  <script defer src="js/auth.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        NOVA MARKET
+      </a>
+      <div class="nav-actions">
+        <button class="button" type="button" data-theme-toggle>◐</button>
+        <a class="button" href="register.html">إنشاء حساب</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="form-card">
+      <span class="eyebrow">مرحبا بعودتك</span>
+      <h1>دخول للحساب ديالك</h1>
+      <p class="muted">دخل لحسابك باش تتواصل وتنشر إعلاناتك.</p>
+
+      <p id="auth-message" role="status" aria-live="polite"></p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">البريد الإلكتروني</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="name@example.com"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">كلمة السر</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="دخل كلمة السر"
+            required
+          >
+        </div>
+
+        <button class="button button-primary" type="submit" style="width:100%">
+          تسجيل الدخول
+        </button>
+      </form>
+
+      <div style="text-align:center;margin:18px 0">
+        <span class="muted">أو</span>
+      </div>
+
+      <button
+        class="button"
+        id="google-login"
+        type="button"
+        style="width:100%"
+      >
+        <strong>G</strong> المتابعة باستخدام Google
+      </button>
+
+      <p class="muted" style="text-align:center;margin-top:24px">
+        ما عندكش حساب؟
+        <a href="register.html" style="color:var(--secondary)">إنشاء حساب جديد</a>
+      </p>
+
+      <p style="text-align:center">
+        <a href="index.html" class="muted">← الرجوع للسوق</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© NOVA MARKET</div>
+  </footer>
+</body>
+</html>

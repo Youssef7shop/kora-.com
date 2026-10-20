@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم | NOVA MARKET</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script defer src="js/common.js"></script>
+  <script defer src="js/dashboard.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        NOVA MARKET
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">السوق</a>
+        <a href="messages.html">المحادثات</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="button" type="button" data-theme-toggle>◐</button>
+        <button class="button" type="button" data-signout>خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container dashboard-layout">
+    <aside class="sidebar">
+      <h3>لوحة التحكم</h3>
+      <a href="dashboard.html">＋ نشر إعلان</a>
+      <a href="#my-listings">📦 إعلاناتي</a>
+      <a href="messages.html">💬 المحادثات</a>
+      <a href="index.html">🛍️ تصفح السوق</a>
+      <button type="button" data-signout>تسجيل الخروج</button>
+    </aside>
+
+    <div>
+      <section class="panel">
+        <h1>مرحبا بك فـ NOVA MARKET</h1>
+        <p class="muted">نشر المنتجات والخدمات ديالك وتواصل مع المهتمين.</p>
+        <p id="dashboard-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel">
+        <h2>نشر إعلان جديد</h2>
+
+        <form id="listing-form">
+          <div class="form-group">
+            <label for="kind">نوع الإعلان</label>
+            <select id="kind" name="kind" required>
+              <option value="product">منتج</option>
+              <option value="service">خدمة رقمية</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="title">عنوان الإعلان</label>
+            <input
+              id="title"
+              name="title"
+              maxlength="100"
+              placeholder="مثلاً: حاسوب مستعمل بحالة جيدة"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="description">الوصف</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="5"
+              maxlength="3000"
+              placeholder="شرح تفاصيل المنتج أو الخدمة..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="price">الثمن بالدرهم</label>
+              <input
+                id="price"
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="مثلاً: 250"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="quantity">الكمية</label>
+              <input
+                id="quantity"
+                name="quantity"
+                type="number"
+                min="1"
+                step="1"
+                value="1"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="category">التصنيف</label>
+            <select id="category" name="category" required>
+              <option value="إلكترونيات">إلكترونيات</option>
+              <option value="ملابس">ملابس</option>
+              <option value="المنزل">المنزل</option>
+              <option value="تصميم وبرمجة">تصميم وبرمجة</option>
+              <option value="تسويق رقمي">تسويق رقمي</option>
+              <option value="تعليم">تعليم</option>
+              <option value="أخرى">أخرى</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="image-url">رابط صورة الإعلان</label>
+            <input
+              id="image-url"
+              name="image_url"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+            >
+            <p class="form-help">حالياً تقدر تستعمل رابط صورة مباشر.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="city">المدينة</label>
+            <input
+              id="city"
+              name="city"
+              maxlength="100"
+              placeholder="مثلاً: طنجة"
+            >
+          </div>
+
+          <button class="button button-primary" type="submit">
+            نشر الإعلان
+          </button>
+        </form>
+      </section>
+
+      <section class="panel" id="my-listings">
+        <h2>الإعلانات ديالي</h2>
+        <div id="my-listings-grid" class="listing-grid">
+          <p class="muted">كنحمّلو الإعلانات ديالك...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="notice" class="notice" role="status"></div>
+</body>
+</html>

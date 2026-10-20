@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء حساب | NOVA MARKET</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script defer src="js/common.js"></script>
+  <script defer src="js/auth.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        NOVA MARKET
+      </a>
+      <div class="nav-actions">
+        <button class="button" type="button" data-theme-toggle>◐</button>
+        <a class="button" href="login.html">دخول</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="form-card">
+      <span class="eyebrow">انضم لمجتمع NOVA</span>
+      <h1>صايب الحساب ديالك</h1>
+      <p class="muted">سجّل باش تقدر تبيع وتشري وتتواصل مع المستخدمين.</p>
+
+      <p id="auth-message" role="status" aria-live="polite"></p>
+
+      <form id="register-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="first-name">الاسم</label>
+            <input
+              id="first-name"
+              name="first_name"
+              autocomplete="given-name"
+              placeholder="الاسم"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="last-name">النسب</label>
+            <input
+              id="last-name"
+              name="last_name"
+              autocomplete="family-name"
+              placeholder="النسب"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">البريد الإلكتروني</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="name@example.com"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">كلمة السر</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="8 حروف على الأقل"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">تأكيد كلمة السر</label>
+          <input
+            id="confirm-password"
+            name="confirm_password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="عاود دخل كلمة السر"
+            required
+          >
+        </div>
+
+        <p class="form-help">
+          استعمل كلمة سر قوية وما تشاركها مع حتى واحد.
+        </p>
+
+        <button class="button button-primary" type="submit" style="width:100%">
+          إنشاء الحساب
+        </button>
+      </form>
+
+      <p class="muted" style="text-align:center;margin-top:22px">
+        عندك حساب من قبل؟
+        <a href="login.html" style="color:var(--secondary)">دخل من هنا</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© NOVA MARKET</div>
+  </footer>
+</body>
+</html>
