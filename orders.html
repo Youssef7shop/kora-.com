@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10101a">
+  <meta name="description" content="تتبع وإدارة طلباتك على NOVA MARKET">
+  <title>طلباتي | NOVA MARKET</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .orders-page {
+      width: min(1150px, 94%);
+      margin: 32px auto 70px;
+    }
+
+    .orders-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .orders-heading h1 {
+      margin-bottom: 8px;
+    }
+
+    .orders-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .orders-stat {
+      padding: 20px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 16px;
+      background: var(--surface, #191923);
+    }
+
+    .orders-stat span {
+      display: block;
+      color: var(--muted, #aaa);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .orders-stat strong {
+      font-size: 26px;
+    }
+
+    .orders-toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .orders-toolbar input,
+    .orders-toolbar select {
+      min-width: 180px;
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 10px;
+      background: var(--surface, #191923);
+      color: inherit;
+    }
+
+    .orders-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .orders-tabs button {
+      padding: 9px 14px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .orders-tabs button.active {
+      background: var(--primary, #7065ff);
+      color: white;
+      border-color: transparent;
+    }
+
+    .orders-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .order-card {
+      padding: 20px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 16px;
+      background: var(--surface, #191923);
+    }
+
+    .order-card-header,
+    .order-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .order-card h3 {
+      margin: 10px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .order-card p {
+      color: var(--muted, #aaa);
+      line-height: 1.8;
+    }
+
+    .order-status {
+      display: inline-flex;
+      padding: 6px 11px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .order-price {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .order-actions button,
+    .order-actions a {
+      padding: 10px 14px;
+      border: 1px solid var(--border, #30303d);
+      border-radius: 10px;
+      color: inherit;
+      background: transparent;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .order-actions .primary-action {
+      background: var(--primary, #7065ff);
+      color: white;
+      border-color: transparent;
+    }
+
+    .order-empty {
+      padding: 40px 20px;
+      text-align: center;
+      border: 1px dashed var(--border, #30303d);
+      border-radius: 16px;
+    }
+
+    .orders-notice {
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 760px) {
+      .orders-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .orders-page {
+        width: min(100% - 24px, 1150px);
+        margin-top: 22px;
+      }
+
+      .order-card {
+        padding: 15px;
+      }
+    }
+
+    
+/* =========================================
+   NOVA MARKET — PROFESSIONAL HEADER
+   ========================================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background: rgba(9, 12, 24, 0.94);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.header-inner {
+  width: min(1200px, calc(100% - 40px));
+  min-height: 82px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-block: 14px;
+}
+
+/* Logo */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  color: #fff;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #7065ff, #24c8ff);
+  box-shadow: 0 6px 24px rgba(76, 110, 255, 0.3);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+/* Navigation */
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 13px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease,
+              border-color 0.2s ease;
+}
+
+.header-nav a:hover,
+.header-nav a[aria-current="page"] {
+  color: #fff;
+  background: rgba(112, 101, 255, 0.14);
+  border-color: rgba(112, 101, 255, 0.3);
+}
+
+/* Header buttons */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-actions button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.header-actions button:hover {
+  transform: translateY(-1px);
+  background: rgba(112, 101, 255, 0.2);
+}
+
+/* Light theme */
+
+html[data-theme="light"] .site-header {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom-color: #e2e8f0;
+}
+
+html[data-theme="light"] .brand {
+  color: #111827;
+}
+
+html[data-theme="light"] .header-nav a {
+  color: #475569;
+}
+
+html[data-theme="light"] .header-nav a:hover,
+html[data-theme="light"] .header-nav a[aria-current="page"] {
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+html[data-theme="light"] .header-actions button {
+  color: #1e293b;
+  background: #fff;
+  border-color: #dbe2ea;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+  .header-inner {
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .brand {
+    margin-inline-end: auto;
+  }
+
+  .header-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .header-nav a {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    width: calc(100% - 24px);
+    gap: 12px;
+    padding-block: 12px;
+  }
+
+  .brand {
+    gap: 8px;
+    font-size: 17px;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    font-size: 21px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-actions button {
+    min-height: 36px;
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+
+  .header-nav {
+    justify-content: flex-start;
+  }
+
+  .header-nav a {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">N</span>
+        <span>NOVA MARKET</span>
+      </a>
+
+      <nav class="header-nav" aria-label="القائمة الرئيسية">
+        <a href="index.html">السوق</a>
+        <a href="dashboard.html">لوحة التحكم</a>
+        <a href="messages.html">المحادثات</a>
+        <a href="orders.html" aria-current="page">الطلبات</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" data-theme-toggle aria-label="تغيير المظهر">
+          ☀️ / 🌙
+        </button>
+        <button type="button" data-signout>خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="orders-page">
+    <div class="orders-heading">
+      <div>
+    
+        <h1>الطلبات ديالي</h1>
+        <p class="muted">
+          تتبع المشتريات ديالك والطلبات اللي توصلتي بها كبائع.
+        </p>
+      </div>
+
+      <a href="index.html" class="button">اكتشف السوق</a>
+    </div>
+
+    <div id="orders-notice" class="orders-notice" role="status" aria-live="polite" hidden></div>
+
+    <section class="orders-stats" aria-label="إحصائيات الطلبات">
+      <article class="orders-stat">
+        <span>جميع الطلبات</span>
+        <strong id="stat-total">—</strong>
+      </article>
+
+      <article class="orders-stat">
+        <span>قيد المعالجة</span>
+        <strong id="stat-active">—</strong>
+      </article>
+
+      <article class="orders-stat">
+        <span>مكتملة</span>
+        <strong id="stat-completed">—</strong>
+      </article>
+
+      <article class="orders-stat">
+        <span>طلبات البيع</span>
+        <strong id="stat-selling">—</strong>
+      </article>
+    </section>
+
+    <section class="orders-toolbar" aria-label="البحث والفلترة">
+      <input
+        id="orders-search"
+        type="search"
+        placeholder="قلب برقم الطلب أو اسم المنتج..."
+        aria-label="البحث في الطلبات"
+      >
+
+      <select id="orders-role-filter" aria-label="نوع الطلب">
+        <option value="all">جميع الطلبات</option>
+        <option value="buying">المشتريات ديالي</option>
+        <option value="selling">الطلبات اللي توصلت بها</option>
+      </select>
+
+      <select id="orders-status-filter" aria-label="حالة الطلب">
+        <option value="all">جميع الحالات</option>
+        <option value="pending">في الانتظار</option>
+        <option value="paid">تم الأداء</option>
+        <option value="in_progress">قيد التنفيذ</option>
+        <option value="delivered">تم التسليم</option>
+        <option value="completed">مكتمل</option>
+        <option value="cancelled">ملغى</option>
+        <option value="disputed">نزاع</option>
+        <option value="refunded">مسترجع</option>
+      </select>
+    </section>
+
+    <div class="orders-tabs" aria-label="فلترة سريعة">
+      <button type="button" class="active" data-order-tab="all">الكل</button>
+      <button type="button" data-order-tab="pending">في الانتظار</button>
+      <button type="button" data-order-tab="in_progress">قيد التنفيذ</button>
+      <button type="button" data-order-tab="delivered">تم التسليم</button>
+      <button type="button" data-order-tab="completed">مكتمل</button>
+    </div>
+
+    <section id="orders-list" class="orders-list" aria-live="polite">
+      <div class="order-empty">
+        كنحمّلو الطلبات ديالك...
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/orders.js"></script>
+</body>
+</html>
