@@ -1,12 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="NOVA MARKET - سوق المنتجات والخدمات الرقمية">
+  <meta name="description" content="NOVA MARKET - سوق المنتجات والخدمات الرقمية في المغرب">
+
   <title>NOVA MARKET | السوق ديالك</title>
+
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
   <link rel="stylesheet" href="css/style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/supabase-client.js"></script>
@@ -17,12 +21,23 @@
 <body>
   <header class="topbar">
     <div class="container nav">
-      <a class="brand" href="index.html">
-        <span class="brand-mark">N</span>
-        NOVA MARKET
+
+      <!-- NOVA MARKET BRAND -->
+      <a class="brand nova-brand" href="index.html" aria-label="NOVA MARKET - الرئيسية">
+        <img
+          class="nova-logo"
+          src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+          alt="NOVA MARKET"
+          width="48"
+          height="48"
+        >
+        <span class="nova-brand-text">
+          <strong>NOVA</strong>
+          <small>MARKET</small>
+        </span>
       </a>
 
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="القائمة الرئيسية">
         <a href="index.html">الرئيسية</a>
         <a href="#market">السوق</a>
         <a href="dashboard.html">بيع منتج</a>
@@ -30,8 +45,15 @@
       </nav>
 
       <div class="nav-actions">
-        <button class="button" data-theme-toggle>◐</button>
+        <button
+          class="button"
+          type="button"
+          data-theme-toggle
+          aria-label="تغيير الوضع الليلي والنهاري"
+        >◐</button>
+
         <a class="button" href="login.html">دخول</a>
+
         <a class="button button-primary" href="register.html">
           إنشاء حساب
         </a>
@@ -58,14 +80,23 @@
           <a class="button button-primary" href="#market">
             اكتشف السوق
           </a>
+
           <a class="button" href="dashboard.html">
             + نشر إعلان
           </a>
         </div>
       </div>
 
-      <div class="hero-art">
-        <div class="hero-symbol">NOVA</div>
+      <div class="hero-art" aria-label="هوية NOVA MARKET">
+        <img
+          class="hero-logo"
+          src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+          alt="شعار NOVA MARKET"
+          width="180"
+          height="180"
+        >
+        <div class="hero-symbol">NOVA MARKET</div>
+        <p class="hero-tagline">تسوّق • بيع • اكتشف</p>
       </div>
     </section>
 
@@ -89,6 +120,7 @@
 
         <button
           class="button button-primary"
+          type="button"
           onclick="document.querySelector('#search').focus()"
         >
           بحث
@@ -122,7 +154,7 @@
 
   <footer class="footer">
     <div class="container">
-      <strong>NOVA MARKET</strong>
+      <strong class="footer-brand">NOVA MARKET</strong>
       <p>المنتجات والخدمات الرقمية في مكان واحد.</p>
       <p>تأكد من معلومات البائع قبل إتمام أي معاملة.</p>
     </div>
