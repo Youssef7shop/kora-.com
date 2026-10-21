@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
   <link rel="apple-touch-icon" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
   <link rel="stylesheet" href="css/style.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/supabase-client.js"></script>
@@ -49,7 +49,34 @@
       <a href="messages.html">💬 المحادثات</a>
       <a href="index.html">🛍️ تصفح السوق</a>
       <a href="orders.html">📦 الطلبات</a>
-      <button type="button" data-signout>تسجيل الخروج</button>
+     
+
+<!-- بروفايل المستخدم -->
+<a href="profile.html" class="profile-menu-link">
+  <img
+    src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+    alt="الصورة الشخصية"
+    class="profile-avatar"
+    data-account-avatar
+  >
+
+  <span class="profile-menu-info">
+    <strong data-account-name>البروفايل ديالي</strong>
+    <small data-account-email>كنحمّلو معلومات الحساب...</small>
+  </span>
+
+  <span aria-hidden="true">⚙️</span>
+</a>
+
+<!-- تسجيل الخروج -->
+<button
+  class="profile-logout"
+  type="button"
+  data-signout
+>
+  ↪ تسجيل الخروج
+</button>
+
     </aside>
 
     <div>

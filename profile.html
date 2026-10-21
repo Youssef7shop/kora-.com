@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="البروفايل الشخصي - NOVA MARKET">
+  <title>البروفايل ديالي | NOVA MARKET</title>
+
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
+  <link rel="stylesheet" href="css/style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script defer src="js/common.js"></script>
+  <script defer src="js/profile.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand nova-brand" href="index.html">
+        <img
+          src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+          alt="NOVA MARKET"
+          class="nova-logo"
+          width="44"
+          height="44"
+        >
+        <span class="nova-brand-text">
+          <strong>NOVA</strong>
+          <small>MARKET</small>
+        </span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">السوق</a>
+        <a href="dashboard.html">لوحة التحكم</a>
+        <a href="orders.html">الطلبات</a>
+        <a href="messages.html">المحادثات</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="button" type="button" data-theme-toggle>◐</button>
+        <button class="button" type="button" data-signout>تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container profile-page">
+    <section class="profile-heading">
+      <span class="eyebrow">✦ NOVA MARKET ACCOUNT</span>
+      <h1>البروفايل ديالي</h1>
+      <p class="muted">تسيير معلومات الحساب الشخصي ديالك.</p>
+    </section>
+
+    <section class="profile-card">
+      <div class="profile-cover"></div>
+
+      <div class="profile-main">
+        <div class="profile-avatar-wrap">
+          <img
+            id="profile-avatar"
+            class="profile-large-avatar"
+            src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+            alt="الصورة الشخصية"
+          >
+          <span class="profile-online-dot" title="الحساب ديالك"></span>
+        </div>
+
+        <div class="profile-identity">
+          <h2 id="profile-heading-name">كنحمّلو الحساب...</h2>
+          <p id="profile-heading-email" class="muted"></p>
+          <span class="profile-provider" id="profile-provider">حساب NOVA MARKET</span>
+        </div>
+      </div>
+
+      <div id="profile-notice" class="profile-notice" role="status" aria-live="polite"></div>
+
+      <form id="profile-form" class="profile-form">
+        <h3>المعلومات الشخصية</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="display-name">الاسم الكامل</label>
+            <input
+              id="display-name"
+              name="display_name"
+              type="text"
+              maxlength="100"
+              placeholder="كتب الاسم ديالك"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email">البريد الإلكتروني</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              readonly
+              dir="ltr"
+            >
+            <small class="form-help">الإيميل مرتبط بحساب تسجيل الدخول.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city">المدينة</label>
+          <input
+            id="city"
+            name="city"
+            type="text"
+            maxlength="100"
+            placeholder="مثلاً: طنجة"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="avatar-url">رابط الصورة الشخصية</label>
+          <input
+            id="avatar-url"
+            name="avatar_url"
+            type="url"
+            placeholder="https://example.com/photo.jpg"
+            dir="ltr"
+          >
+          <small class="form-help">
+            حط رابط مباشر لصورة ديالك، وغادي نستعملوه فالبروفايل.
+          </small>
+        </div>
+
+        <div class="profile-actions">
+          <button class="button button-primary" id="save-profile" type="submit">
+            حفظ التغييرات
+          </button>
+          <a class="button" href="dashboard.html">رجوع للوحة التحكم</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="profile-security">
+      <div>
+        <h3>أمان الحساب</h3>
+        <p class="muted">حافظ على معلومات الدخول ديالك وما تشاركش كلمة السر.</p>
+      </div>
+      <button class="button" type="button" data-signout>تسجيل الخروج</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong>NOVA MARKET</strong>
+      <p>المنتجات والخدمات الرقمية في مكان واحد.</p>
+    </div>
+  </footer>
+
+  <div id="notice" class="notice" role="status"></div>
+</body>
+</html>

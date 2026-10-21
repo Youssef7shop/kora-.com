@@ -6,50 +6,40 @@
 
   NOVA.client = function () {
     if (!window.novaClient) {
-      throw new Error(
-        "Supabase مازال ما متهيّأش. راجع js/supabase-config.js"
-      );
+      throw new Error("Supabase مازال ما متهيّأش. راجع js/supabase-config.js");
     }
-
     return window.novaClient;
   };
 
   NOVA.user = async function () {
     const { data, error } = await NOVA.client().auth.getUser();
-
     if (error) throw error;
-
     return data.user || null;
   };
 
   NOVA.requireUser = async function () {
     const user = await NOVA.user();
-
     if (!user) {
       window.location.href = "login.html";
       return null;
     }
-
     return user;
   };
 
   NOVA.esc = function (value) {
     return String(value ?? "").replace(/[&<>"']/g, function (char) {
-      const entities = {
+      return {
         "&": "&amp;",
         "<": "&lt;",
         ">": "&gt;",
         '"': "&quot;",
         "'": "&#39;"
-      };
-
-      return entities[char];
+      }[char];
     });
   };
 
   NOVA.money = function (amount, currency = "MAD") {
     const number = Number(amount);
-
     if (!Number.isFinite(number)) return "الثمن غير محدد";
 
     return new Intl.NumberFormat("fr-MA", {
@@ -73,10 +63,7 @@
     notice.textContent = String(message);
     notice.classList.add("show");
 
-    if (NOVA.toastTimer) {
-      clearTimeout(NOVA.toastTimer);
-    }
-
+    clearTimeout(NOVA.toastTimer);
     NOVA.toastTimer = setTimeout(function () {
       notice.classList.remove("show");
     }, 3500);
@@ -90,8 +77,67 @@
       .maybeSingle();
 
     if (error) throw error;
-
     return data;
+  };
+
+  // جلب الاسم والصورة من Supabase وGoogle إذا توفرت
+  NOVA.getAccountInfo = async function (user) {
+    const metadata = user.user_metadata || {};
+    let profile = null;
+
+    try {
+      profile = await NOVA.profile(user.id);
+    } catch (error) {
+      console.warn("تعذر تحميل profile:", error.message);
+    }
+
+    const name =
+      profile?.display_name ||
+      metadata.full_name ||
+      metadata.name ||
+      [metadata.first_name, metadata.last_name].filter(Boolean).join(" ") ||
+      (user.email ? user.email.split("@")[0] : "المستخدم");
+
+    const avatar =
+      profile?.avatar_url ||
+      metadata.avatar_url ||
+      metadata.picture ||
+      "images/default-avatar.png";
+
+    return {
+      id: user.id,
+      name: name,
+      email: user.email || "",
+      avatar: avatar,
+      city: profile?.city || ""
+    };
+  };
+
+  // عرض بيانات الحساب في عناصر القائمة أو الصفحة
+  NOVA.renderAccount = async function (user) {
+    if (!user) return;
+
+    const account = await NOVA.getAccountInfo(user);
+
+    document.querySelectorAll("[data-account-name]").forEach(function (el) {
+      el.textContent = account.name;
+    });
+
+    document.querySelectorAll("[data-account-email]").forEach(function (el) {
+      el.textContent = account.email;
+    });
+
+    document.querySelectorAll("[data-account-avatar]").forEach(function (el) {
+      el.src = account.avatar;
+      el.alt = "صورة " + account.name;
+
+      el.onerror = function () {
+        this.onerror = null;
+        this.src = "images/default-avatar.png";
+      };
+    });
+
+    return account;
   };
 
   NOVA.signOut = async function () {
@@ -108,7 +154,6 @@
   NOVA.initTheme = function () {
     const savedTheme = localStorage.getItem("nova-theme");
     const theme = savedTheme === "light" ? "light" : "dark";
-
     document.documentElement.setAttribute("data-theme", theme);
   };
 
@@ -121,35 +166,32 @@
     localStorage.setItem("nova-theme", next);
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", async function () {
     NOVA.initTheme();
 
     document.querySelectorAll("[data-theme-toggle]").forEach(function (button) {
       button.addEventListener("click", NOVA.toggleTheme);
     });
 
-    document.querySelectorAll("[data-signout]").forEach(function (button) {
+    document.querySelectorAll("[data-signout], #logout-button").forEach(function (button) {
       button.addEventListener("click", NOVA.signOut);
     });
 
-    if (window.novaClient) {
-      window.novaClient.auth.getUser()
-        .then(function ({ data }) {
-          const user = data.user;
+    if (!window.novaClient) return;
 
-          document.querySelectorAll("[data-nav-user]").forEach(function (link) {
-            if (user) {
-              link.textContent = "حسابي";
-              link.href = "dashboard.html";
-            } else {
-              link.textContent = "دخول";
-              link.href = "login.html";
-            }
-          });
-        })
-        .catch(function (error) {
-          console.error("NOVA MARKET auth check:", error);
-        });
+    try {
+      const user = await NOVA.user();
+
+      document.querySelectorAll("[data-nav-user]").forEach(function (link) {
+        link.textContent = user ? "حسابي" : "دخول";
+        link.href = user ? "dashboard.html" : "login.html";
+      });
+
+      if (user) {
+        await NOVA.renderAccount(user);
+      }
+    } catch (error) {
+      console.error("NOVA MARKET account:", error);
     }
   });
 
