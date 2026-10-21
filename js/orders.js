@@ -4,20 +4,8 @@
 
   const $ = (selector) => document.querySelector(selector);
 
-  const escapeHTML = (value) =>
-    String(value ?? "").replace(/[&<>"']/g, (char) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[char]);
-
-  const money = (value) =>
-    `${Number(value || 0).toFixed(2)} درهم`;
-
   const statusNames = {
-    pending: "في انتظار موافقة البائع",
+    pending: "في انتظار البائع",
     accepted: "مقبول",
     rejected: "مرفوض",
     in_progress: "قيد التنفيذ",
@@ -26,7 +14,7 @@
     cancelled: "ملغى"
   };
 
-  const sellerTransitions = {
+  const transitions = {
     pending: ["accepted", "rejected"],
     accepted: ["in_progress", "cancelled"],
     in_progress: ["shipped", "completed"],
@@ -36,150 +24,237 @@
     cancelled: []
   };
 
-  function notice(message, error = false) {
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[c]);
+
+  const money = (value, currency = "MAD") => {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "الثمن غير متوفر";
+    return new Intl.NumberFormat("fr-MA", {
+      style: "currency",
+      currency: currency || "MAD"
+    }).format(n);
+  };
+
+  function showNotice(message, isError = false) {
     const el = $("#orders-notice");
-    if (!el) return;
-    el.textContent = message;
-    el.style.color = error ? "#ff7777" : "#54d6a0";
+    if (el) {
+      el.textContent = message;
+      el.style.color = isError ? "#ff7777" : "#50d9a0";
+    } else {
+      console[isError ? "error" : "log"](message);
+    }
   }
 
-  function client() {
+  function getClient() {
     if (!window.novaClient) {
-      throw new Error("Supabase مازال ما متهيّأش. راجع js/supabase-config.js");
+      throw new Error(
+        "Supabase ما مربوطش. راجع js/supabase-config.js و js/supabase-client.js."
+      );
     }
     return window.novaClient;
   }
 
-  function renderOrder(order, isSeller) {
-    const items = (order.order_items || []).map((item) => `
+  function renderOrder(order, items, isSeller) {
+    const itemHTML = items.map(item => `
       <div>
-        ${escapeHTML(item.title)} × ${Number(item.quantity)}
-        — ${money(item.line_total)}
+        ${esc(item.title || item.listing_title || "منتج")}
+        × ${esc(item.quantity ?? 1)}
+        — ${money(item.line_total ?? (
+          Number(item.unit_price || 0) * Number(item.quantity || 1)
+        ), order.currency)}
       </div>
     `).join("");
 
-    const allowed = isSeller
-      ? (sellerTransitions[order.status] || [])
-      : [];
+    const allowed = isSeller ? (transitions[order.status] || []) : [];
 
-    const actions = allowed.map((status) => `
+    const buttons = allowed.map(status => `
       <button type="button"
-        data-order-id="${escapeHTML(order.id)}"
-        data-next-status="${escapeHTML(status)}">
-        ${escapeHTML(statusNames[status] || status)}
+        class="button"
+        data-order-id="${esc(order.id)}"
+        data-next-status="${esc(status)}">
+        ${esc(statusNames[status] || status)}
       </button>
     `).join("");
+
+    const total = order.total ?? order.subtotal ?? order.total_amount;
 
     return `
       <article class="order-card">
         <div class="order-row">
-          <strong>${escapeHTML(order.order_number || order.id)}</strong>
-          <strong>${money(order.total)}</strong>
+          <strong>طلب ${esc(order.order_number || order.id)}</strong>
+          <strong>${money(total, order.currency)}</strong>
         </div>
-        <p>الحالة: <strong>${escapeHTML(statusNames[order.status] || order.status)}</strong></p>
-        <div>${items || "تفاصيل المنتج غير متوفرة"}</div>
-        <p class="order-muted">الأداء: عند التسليم</p>
-        <p>الهاتف: ${escapeHTML(order.phone)}</p>
-        <p>العنوان: ${escapeHTML(order.delivery_address)}</p>
-        ${order.note ? `<p>ملاحظة: ${escapeHTML(order.note)}</p>` : ""}
+
+        <p>الحالة: <strong>${esc(statusNames[order.status] || order.status || "غير محددة")}</strong></p>
+
+        <div>${itemHTML || "تفاصيل المنتجات غير متوفرة."}</div>
+
+        <p>الأداء: عند التسليم</p>
+        ${order.phone ? `<p>الهاتف: ${esc(order.phone)}</p>` : ""}
+        ${order.delivery_address ? `<p>العنوان: ${esc(order.delivery_address)}</p>` : ""}
+        ${order.note ? `<p>ملاحظة: ${esc(order.note)}</p>` : ""}
+
         <p class="order-muted">
-          تاريخ الطلب: ${escapeHTML(new Date(order.created_at).toLocaleString("ar-MA"))}
+          ${order.created_at
+            ? "تاريخ الطلب: " + esc(new Date(order.created_at).toLocaleString("ar-MA"))
+            : ""}
         </p>
-        ${actions ? `<div class="order-actions">${actions}</div>` : ""}
+
+        ${buttons ? `<div class="order-actions">${buttons}</div>` : ""}
       </article>
     `;
   }
 
+  async function loadSide(api, userId, field, container, isSeller) {
+    if (!container) return;
+
+    // تحميل الطلبات أولاً، دون افتراض أسماء أعمدة أخرى.
+    const { data: orders, error } = await api
+      .from("orders")
+      .select("*")
+      .eq(field, userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+
+    if (!orders?.length) {
+      container.innerHTML = "<p>ما كاين حتى طلب دابا.</p>";
+      return;
+    }
+
+    // تحميل تفاصيل الطلبات بشكل منفصل لتفادي مشاكل العلاقة التلقائية.
+    let items = [];
+    const ids = orders.map(order => order.id).filter(Boolean);
+
+    if (ids.length) {
+      const result = await api
+        .from("order_items")
+        .select("*")
+        .in("order_id", ids);
+
+      if (result.error) throw result.error;
+      items = result.data || [];
+    }
+
+    container.innerHTML = orders.map(order => {
+      const orderItems = items.filter(item => item.order_id === order.id);
+      return renderOrder(order, orderItems, isSeller);
+    }).join("");
+  }
+
   async function loadOrders() {
-    const api = client();
-    const { data: authData, error: authError } = await api.auth.getUser();
+    const api = getClient();
+    showNotice("كنحمّلو الطلبات...");
 
-    if (authError) throw authError;
-    const user = authData?.user;
+    const { data, error } = await api.auth.getUser();
+    if (error) throw error;
 
-    if (!user) {
-      notice("خاصك تدخل للحساب ديالك باش تشوف الطلبات.", true);
+    if (!data?.user) {
+      showNotice("خاصك تدخل للحساب ديالك باش تشوف الطلبات.", true);
+
       if ($("#orders-list")) {
         $("#orders-list").innerHTML =
           '<a href="login.html">دخول للحساب</a>';
       }
+
       if ($("#seller-orders-list")) {
         $("#seller-orders-list").innerHTML = "";
       }
       return;
     }
 
-    const [buyerResult, sellerResult] = await Promise.all([
-      api.from("orders")
-        .select("id,order_number,buyer_id,seller_id,status,total,currency,payment_method,delivery_address,phone,note,created_at,order_items(title,quantity,unit_price,line_total)")
-        .eq("buyer_id", user.id)
-        .order("created_at", { ascending: false }),
-
-      api.from("orders")
-        .select("id,order_number,buyer_id,seller_id,status,total,currency,payment_method,delivery_address,phone,note,created_at,order_items(title,quantity,unit_price,line_total)")
-        .eq("seller_id", user.id)
-        .order("created_at", { ascending: false })
+    await Promise.all([
+      loadSide(api, data.user.id, "buyer_id", $("#orders-list"), false),
+      loadSide(api, data.user.id, "seller_id", $("#seller-orders-list"), true)
     ]);
 
-    if (buyerResult.error) throw buyerResult.error;
-    if (sellerResult.error) throw sellerResult.error;
-
-    $("#orders-list").innerHTML = buyerResult.data.length
-      ? buyerResult.data.map((order) => renderOrder(order, false)).join("")
-      : "<p>ما عندك حتى طلب دابا.</p>";
-
-    $("#seller-orders-list").innerHTML = sellerResult.data.length
-      ? sellerResult.data.map((order) => renderOrder(order, true)).join("")
-      : "<p>ما توصلتي حتى بطلب دابا.</p>";
+    showNotice("تحدّثات لائحة الطلبات.");
   }
 
-  async function updateStatus(orderId, nextStatus, button) {
-    const api = client();
+  async function updateStatus(button) {
+    const api = getClient();
+    const id = button.dataset.orderId;
+    const next = button.dataset.nextStatus;
 
-    if (!Object.values(sellerTransitions).some((list) =>
-      list.includes(nextStatus)
-    )) {
+    if (!Object.values(transitions).some(list => list.includes(next))) {
       throw new Error("الحالة المطلوبة غير مسموح بها.");
+    }
+
+    const { data: authData, error: authError } = await api.auth.getUser();
+    if (authError) throw authError;
+    if (!authData?.user) throw new Error("دخل للحساب ديالك أولاً.");
+
+    // نتحقق أن الطلب تابع للبائع الحالي قبل محاولة التحديث.
+    const { data: order, error: orderError } = await api
+      .from("orders")
+      .select("id,seller_id,status")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (orderError) throw orderError;
+    if (!order || order.seller_id !== authData.user.id) {
+      throw new Error("ما عندكش صلاحية لتحديث هاد الطلب.");
+    }
+
+    if (!(transitions[order.status] || []).includes(next)) {
+      throw new Error("ما يمكنش تبدّل حالة الطلب من هاد المرحلة.");
     }
 
     button.disabled = true;
     const { error } = await api
       .from("orders")
       .update({
-        status: nextStatus,
+        status: next,
         updated_at: new Date().toISOString()
       })
-      .eq("id", orderId);
+      .eq("id", id)
+      .eq("seller_id", authData.user.id);
 
     if (error) throw error;
-    notice("تحدّثات حالة الطلب بنجاح.");
+
+    showNotice("تحدّثات حالة الطلب.");
     await loadOrders();
   }
 
-  document.addEventListener("click", async (event) => {
-    const button = event.target.closest("[data-order-id][data-next-status]");
+  document.addEventListener("click", async event => {
+    const button = event.target.closest(
+      "[data-order-id][data-next-status]"
+    );
     if (!button) return;
 
     try {
-      await updateStatus(
-        button.dataset.orderId,
-        button.dataset.nextStatus,
-        button
-      );
+      await updateStatus(button);
     } catch (error) {
-      notice(error.message || "ما قدرناش نحدّثو الطلب.", true);
+      console.error("NOVA orders update:", error);
+      showNotice(error.message || "ما قدرناش نحدّثو حالة الطلب.", true);
       button.disabled = false;
     }
   });
 
-  document.addEventListener("DOMContentLoaded", async () => {
+  async function init() {
     try {
       await loadOrders();
     } catch (error) {
-      console.error("NOVA orders:", error);
-      notice(error.message || "وقع خطأ أثناء تحميل الطلبات.", true);
+      console.error("NOVA orders loading error:", error);
+      showNotice(
+        "خطأ فتحميل الطلبات: " + (error.message || "خطأ غير معروف"),
+        true
+      );
+
       if ($("#orders-list")) $("#orders-list").innerHTML = "";
-      if ($("#seller-orders-list")) $("#seller-orders-list").innerHTML = "";
+      if ($("#seller-orders-list")) {
+        $("#seller-orders-list").innerHTML = "";
+      }
     }
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
