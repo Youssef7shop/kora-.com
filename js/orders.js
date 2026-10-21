@@ -1,455 +1,185 @@
 
-(function () {
+(() => {
   "use strict";
 
-  document.addEventListener("DOMContentLoaded", async function () {
-    const client = window.novaClient;
+  const $ = (selector) => document.querySelector(selector);
 
-    const list = document.getElementById("orders-list");
-    const notice = document.getElementById("orders-notice");
-    const searchInput = document.getElementById("orders-search");
-    const roleFilter = document.getElementById("orders-role-filter");
-    const statusFilter = document.getElementById("orders-status-filter");
+  const escapeHTML = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
 
-    if (!list) return;
+  const money = (value) =>
+    `${Number(value || 0).toFixed(2)} درهم`;
 
-    let currentUser = null;
-    let orders = [];
-    let quickStatus = "all";
+  const statusNames = {
+    pending: "في انتظار موافقة البائع",
+    accepted: "مقبول",
+    rejected: "مرفوض",
+    in_progress: "قيد التنفيذ",
+    shipped: "خرج للتوصيل",
+    completed: "مكتمل",
+    cancelled: "ملغى"
+  };
 
-    const STATUS_LABELS = {
-      pending: "في الانتظار",
-      paid: "تم الأداء",
-      in_progress: "قيد التنفيذ",
-      delivered: "تم التسليم",
-      completed: "مكتمل",
-      cancelled: "ملغى",
-      disputed: "نزاع",
-      refunded: "مسترجع"
-    };
+  const sellerTransitions = {
+    pending: ["accepted", "rejected"],
+    accepted: ["in_progress", "cancelled"],
+    in_progress: ["shipped", "completed"],
+    shipped: ["completed"],
+    rejected: [],
+    completed: [],
+    cancelled: []
+  };
 
-    const ACTIVE_STATUSES = ["pending", "paid", "in_progress", "delivered"];
+  function notice(message, error = false) {
+    const el = $("#orders-notice");
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = error ? "#ff7777" : "#54d6a0";
+  }
 
-    // ==================================================
-    // أدوات مساعدة
-    // ==================================================
-
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, function (char) {
-        return {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;"
-        }[char];
-      });
+  function client() {
+    if (!window.novaClient) {
+      throw new Error("Supabase مازال ما متهيّأش. راجع js/supabase-config.js");
     }
+    return window.novaClient;
+  }
 
-    function showNotice(message, isError = false) {
-      if (!notice) {
-        if (window.NOVA?.toast) window.NOVA.toast(message);
-        else console.log(message);
-        return;
-      }
+  function renderOrder(order, isSeller) {
+    const items = (order.order_items || []).map((item) => `
+      <div>
+        ${escapeHTML(item.title)} × ${Number(item.quantity)}
+        — ${money(item.line_total)}
+      </div>
+    `).join("");
 
-      notice.hidden = false;
-      notice.textContent = message;
-      notice.className = "orders-notice " + (
-        isError ? "error-text" : "success-text"
-      );
-    }
+    const allowed = isSeller
+      ? (sellerTransitions[order.status] || [])
+      : [];
 
-    function clearNotice() {
-      if (!notice) return;
-      notice.hidden = true;
-      notice.textContent = "";
-    }
+    const actions = allowed.map((status) => `
+      <button type="button"
+        data-order-id="${escapeHTML(order.id)}"
+        data-next-status="${escapeHTML(status)}">
+        ${escapeHTML(statusNames[status] || status)}
+      </button>
+    `).join("");
 
-    function money(amount, currency = "MAD") {
-      const value = Number(amount || 0);
-
-      try {
-        return new Intl.NumberFormat("fr-MA", {
-          style: "currency",
-          currency,
-          maximumFractionDigits: 2
-        }).format(value);
-      } catch {
-        return value.toFixed(2) + " " + currency;
-      }
-    }
-
-    function formatDate(value) {
-      if (!value) return "—";
-
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return "—";
-
-      return new Intl.DateTimeFormat("ar-MA", {
-        dateStyle: "medium",
-        timeStyle: "short"
-      }).format(date);
-    }
-
-    function orderNumber(order) {
-      return order.order_number
-        ? "#" + order.order_number
-        : "#" + String(order.id || "").slice(0, 8).toUpperCase();
-    }
-
-    function orderTitle(order) {
-      const items = Array.isArray(order.order_items)
-        ? order.order_items
-        : [];
-
-      if (items.length === 0) return "طلب NOVA MARKET";
-
-      if (items.length === 1) {
-        return items[0].listing_title || "منتج أو خدمة";
-      }
-
-      return (items[0].listing_title || "منتج أو خدمة") +
-        " +" + (items.length - 1) + " آخر";
-    }
-
-    function isBuyer(order) {
-      return order.buyer_id === currentUser.id;
-    }
-
-    function isSeller(order) {
-      return order.seller_id === currentUser.id;
-    }
-
-    // ==================================================
-    // التحقق من Supabase والحساب
-    // ==================================================
-
-    if (!client) {
-      list.innerHTML = `
-        <div class="order-empty">
-          Supabase ما متهيّأش. راجع js/supabase-config.js.
+    return `
+      <article class="order-card">
+        <div class="order-row">
+          <strong>${escapeHTML(order.order_number || order.id)}</strong>
+          <strong>${money(order.total)}</strong>
         </div>
-      `;
+        <p>الحالة: <strong>${escapeHTML(statusNames[order.status] || order.status)}</strong></p>
+        <div>${items || "تفاصيل المنتج غير متوفرة"}</div>
+        <p class="order-muted">الأداء: عند التسليم</p>
+        <p>الهاتف: ${escapeHTML(order.phone)}</p>
+        <p>العنوان: ${escapeHTML(order.delivery_address)}</p>
+        ${order.note ? `<p>ملاحظة: ${escapeHTML(order.note)}</p>` : ""}
+        <p class="order-muted">
+          تاريخ الطلب: ${escapeHTML(new Date(order.created_at).toLocaleString("ar-MA"))}
+        </p>
+        ${actions ? `<div class="order-actions">${actions}</div>` : ""}
+      </article>
+    `;
+  }
+
+  async function loadOrders() {
+    const api = client();
+    const { data: authData, error: authError } = await api.auth.getUser();
+
+    if (authError) throw authError;
+    const user = authData?.user;
+
+    if (!user) {
+      notice("خاصك تدخل للحساب ديالك باش تشوف الطلبات.", true);
+      if ($("#orders-list")) {
+        $("#orders-list").innerHTML =
+          '<a href="login.html">دخول للحساب</a>';
+      }
+      if ($("#seller-orders-list")) {
+        $("#seller-orders-list").innerHTML = "";
+      }
       return;
     }
+
+    const [buyerResult, sellerResult] = await Promise.all([
+      api.from("orders")
+        .select("id,order_number,buyer_id,seller_id,status,total,currency,payment_method,delivery_address,phone,note,created_at,order_items(title,quantity,unit_price,line_total)")
+        .eq("buyer_id", user.id)
+        .order("created_at", { ascending: false }),
+
+      api.from("orders")
+        .select("id,order_number,buyer_id,seller_id,status,total,currency,payment_method,delivery_address,phone,note,created_at,order_items(title,quantity,unit_price,line_total)")
+        .eq("seller_id", user.id)
+        .order("created_at", { ascending: false })
+    ]);
+
+    if (buyerResult.error) throw buyerResult.error;
+    if (sellerResult.error) throw sellerResult.error;
+
+    $("#orders-list").innerHTML = buyerResult.data.length
+      ? buyerResult.data.map((order) => renderOrder(order, false)).join("")
+      : "<p>ما عندك حتى طلب دابا.</p>";
+
+    $("#seller-orders-list").innerHTML = sellerResult.data.length
+      ? sellerResult.data.map((order) => renderOrder(order, true)).join("")
+      : "<p>ما توصلتي حتى بطلب دابا.</p>";
+  }
+
+  async function updateStatus(orderId, nextStatus, button) {
+    const api = client();
+
+    if (!Object.values(sellerTransitions).some((list) =>
+      list.includes(nextStatus)
+    )) {
+      throw new Error("الحالة المطلوبة غير مسموح بها.");
+    }
+
+    button.disabled = true;
+    const { error } = await api
+      .from("orders")
+      .update({
+        status: nextStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", orderId);
+
+    if (error) throw error;
+    notice("تحدّثات حالة الطلب بنجاح.");
+    await loadOrders();
+  }
+
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-order-id][data-next-status]");
+    if (!button) return;
 
     try {
-      const { data, error } = await client.auth.getUser();
-
-      if (error) throw error;
-
-      currentUser = data.user;
-
-      if (!currentUser) {
-        window.location.replace("login.html");
-        return;
-      }
+      await updateStatus(
+        button.dataset.orderId,
+        button.dataset.nextStatus,
+        button
+      );
     } catch (error) {
-      console.error("Orders auth error:", error);
-
-      list.innerHTML = `
-        <div class="order-empty">
-          ما قدرناش نتحققو من الحساب ديالك.
-        </div>
-      `;
-      return;
+      notice(error.message || "ما قدرناش نحدّثو الطلب.", true);
+      button.disabled = false;
     }
+  });
 
-    // ==================================================
-    // تحميل الطلبات
-    // ==================================================
-
-    async function loadOrders() {
-      list.innerHTML = `
-        <div class="order-empty">كنحمّلو الطلبات...</div>
-      `;
-
-      try {
-        const { data, error } = await client
-          .from("orders")
-          .select(`
-            id,
-            order_number,
-            buyer_id,
-            seller_id,
-            status,
-            currency,
-            subtotal,
-            total,
-            payment_status,
-            payment_method,
-            buyer_note,
-            seller_note,
-            created_at,
-            updated_at,
-            order_items (
-              id,
-              listing_title,
-              listing_kind,
-              unit_price,
-              quantity,
-              line_total
-            )
-          `)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        // RLS خاصها أصلاً ترجع غير الطلبات المسموح بها
-        orders = (data || []).filter(function (order) {
-          return isBuyer(order) || isSeller(order);
-        });
-
-        updateStats();
-        renderOrders();
-      } catch (error) {
-        console.error("Load orders error:", error);
-
-        list.innerHTML = `
-          <div class="order-empty">
-            <h3>ما قدرناش نحمّلو الطلبات</h3>
-            <p>تأكد من SQL ديال orders ومن صلاحيات RLS.</p>
-          </div>
-        `;
-
-        showNotice(
-          error.message || "وقع مشكل فتحميل الطلبات.",
-          true
-        );
-      }
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      await loadOrders();
+    } catch (error) {
+      console.error("NOVA orders:", error);
+      notice(error.message || "وقع خطأ أثناء تحميل الطلبات.", true);
+      if ($("#orders-list")) $("#orders-list").innerHTML = "";
+      if ($("#seller-orders-list")) $("#seller-orders-list").innerHTML = "";
     }
-
-    // ==================================================
-    // الإحصائيات
-    // ==================================================
-
-    function updateStats() {
-      const total = orders.length;
-
-      const active = orders.filter(function (order) {
-        return ACTIVE_STATUSES.includes(order.status);
-      }).length;
-
-      const completed = orders.filter(function (order) {
-        return order.status === "completed";
-      }).length;
-
-      const selling = orders.filter(isSeller).length;
-
-      setText("stat-total", total);
-      setText("stat-active", active);
-      setText("stat-completed", completed);
-      setText("stat-selling", selling);
-    }
-
-    function setText(id, value) {
-      const element = document.getElementById(id);
-      if (element) element.textContent = String(value);
-    }
-
-    // ==================================================
-    // البحث والفلترة
-    // ==================================================
-
-    function getFilteredOrders() {
-      const search = (searchInput?.value || "").trim().toLowerCase();
-      const role = roleFilter?.value || "all";
-      const status = statusFilter?.value || "all";
-
-      return orders.filter(function (order) {
-        if (role === "buying" && !isBuyer(order)) return false;
-        if (role === "selling" && !isSeller(order)) return false;
-
-        if (status !== "all" && order.status !== status) return false;
-
-        if (quickStatus !== "all" && order.status !== quickStatus) {
-          return false;
-        }
-
-        if (search) {
-          const text = [
-            orderNumber(order),
-            order.id,
-            orderTitle(order),
-            order.status,
-            STATUS_LABELS[order.status] || "",
-            ...(order.order_items || []).map(item => item.listing_title || "")
-          ].join(" ").toLowerCase();
-
-          if (!text.includes(search)) return false;
-        }
-
-        return true;
-      });
-    }
-
-    function renderOrders() {
-      const filtered = getFilteredOrders();
-
-      if (!filtered.length) {
-        list.innerHTML = `
-          <div class="order-empty">
-            <h3>ما لقينا حتى طلب</h3>
-            <p>بدّل الفلترة أو رجع للسوق باش تكتشف المنتجات والخدمات.</p>
-            <a href="index.html" class="button">اكتشف السوق</a>
-          </div>
-        `;
-        return;
-      }
-
-      list.innerHTML = filtered.map(function (order) {
-        const buyer = isBuyer(order);
-        const title = orderTitle(order);
-        const statusLabel = STATUS_LABELS[order.status] || order.status;
-        const paymentLabel = order.payment_status === "paid"
-          ? "الأداء مؤكد"
-          : order.payment_status === "refunded"
-            ? "مسترجع"
-            : order.payment_status === "pending"
-              ? "الأداء قيد التحقق"
-              : order.payment_status === "failed"
-                ? "فشل الأداء"
-                : "غير مؤدى";
-
-        const itemSummary = (order.order_items || []).map(function (item) {
-          return `
-            <div>
-              ${escapeHTML(item.listing_title)}
-              — ${escapeHTML(item.quantity)} ×
-              ${escapeHTML(money(item.unit_price, order.currency))}
-            </div>
-          `;
-        }).join("");
-
-        return `
-          <article class="order-card">
-            <div class="order-card-header">
-              <span class="order-status">
-                ${escapeHTML(statusLabel)}
-              </span>
-              <span class="muted">${escapeHTML(orderNumber(order))}</span>
-            </div>
-
-            <h3>${escapeHTML(title)}</h3>
-
-            <p>
-              ${buyer ? "المشتريات ديالي" : "طلب توصل به المتجر ديالي"}
-              · ${escapeHTML(formatDate(order.created_at))}
-            </p>
-
-            <div class="order-items-summary">
-              ${itemSummary}
-            </div>
-
-            <p>
-              حالة الأداء:
-              <strong>${escapeHTML(paymentLabel)}</strong>
-            </p>
-
-            <div class="order-card-footer">
-              <span class="order-price">
-                ${escapeHTML(money(order.total, order.currency))}
-              </span>
-
-              <span class="muted">
-                ${buyer ? "الزبون" : "البائع"}
-              </span>
-            </div>
-
-            <div class="order-actions">
-              <button
-                type="button"
-                class="primary-action"
-                data-order-details="${escapeHTML(order.id)}"
-              >
-                تفاصيل الطلب
-              </button>
-
-              <a href="messages.html">
-                المحادثات
-              </a>
-            </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    // ==================================================
-    // أحداث البحث والفلترة
-    // ==================================================
-
-    searchInput?.addEventListener("input", renderOrders);
-    roleFilter?.addEventListener("change", renderOrders);
-
-    statusFilter?.addEventListener("change", function () {
-      quickStatus = "all";
-
-      document.querySelectorAll("[data-order-tab]").forEach(function (button) {
-        button.classList.toggle(
-          "active",
-          button.dataset.orderTab === "all"
-        );
-      });
-
-      renderOrders();
-    });
-
-    document.querySelectorAll("[data-order-tab]").forEach(function (button) {
-      button.addEventListener("click", function () {
-        quickStatus = button.dataset.orderTab || "all";
-
-        document.querySelectorAll("[data-order-tab]").forEach(function (item) {
-          item.classList.toggle("active", item === button);
-        });
-
-        if (statusFilter) statusFilter.value = "all";
-
-        renderOrders();
-      });
-    });
-
-    // ==================================================
-    // تفاصيل الطلب
-    // ==================================================
-
-    list.addEventListener("click", function (event) {
-      const button = event.target.closest("[data-order-details]");
-      if (!button) return;
-
-      const order = orders.find(function (item) {
-        return item.id === button.dataset.orderDetails;
-      });
-
-      if (!order) {
-        showNotice("ما لقيناش تفاصيل هاد الطلب.", true);
-        return;
-      }
-
-      const details = [
-        "رقم الطلب: " + orderNumber(order),
-        "المنتج/الخدمة: " + orderTitle(order),
-        "الحالة: " + (STATUS_LABELS[order.status] || order.status),
-        "الثمن: " + money(order.total, order.currency),
-        "حالة الأداء: " + order.payment_status,
-        "تاريخ الإنشاء: " + formatDate(order.created_at)
-      ];
-
-      const items = (order.order_items || []).map(function (item) {
-        return (
-          "- " + item.listing_title +
-          " | الكمية: " + item.quantity +
-          " | الثمن: " + money(item.line_total, order.currency)
-        );
-      });
-
-      alert(details.concat(items).join("\n"));
-    });
-
-    // ==================================================
-    // بدء الصفحة
-    // ==================================================
-
-    await loadOrders();
   });
 })();
