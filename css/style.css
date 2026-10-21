@@ -801,3 +801,48 @@ textarea:focus {
   opacity: 0.7;
   font-size: 0.75rem;
 }
+
+.nova-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.nova-logo {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.nova-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1;
+}
+
+.nova-brand-text strong {
+  font-size: 21px;
+  font-weight: 900;
+  color: #39a5ff;
+}
+
+.nova-brand-text small {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #a875ff;
+}
+
+@media (max-width: 480px) {
+  .nova-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nova-brand-text strong {
+    font-size: 17px;
+  }
+}
