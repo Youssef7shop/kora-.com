@@ -1,24 +1,345 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>المحادثات | NOVA MARKET</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
-  <link rel="apple-touch-icon" href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png">
+
+  <meta
+    name="description"
+    content="تواصل مع المشترين والبائعين بسهولة عبر NOVA MARKET."
+  >
+  <meta name="theme-color" content="#080b16">
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+  >
+  <link
+    rel="apple-touch-icon"
+    href="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
+  >
+
   <link rel="stylesheet" href="css/style.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
- <script src="js/supabase-config.js"></script>
- <script src="js/supabase-client.js"></script>
- <script src="js/common.js"></script>
- <script src="js/messages.js"></script>
+  <style>
+    /* =====================================
+       NOVA MARKET - Messages Page
+    ===================================== */
+
+    .messages-page {
+      padding-top: 32px;
+      padding-bottom: 48px;
+    }
+
+    .messages-heading {
+      margin-bottom: 24px;
+    }
+
+    .messages-heading h1 {
+      margin-bottom: 8px;
+    }
+
+    .messages-heading p {
+      margin-top: 0;
+    }
+
+    .messages-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .messages-toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .messages-layout {
+      display: grid;
+      grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+      min-height: 560px;
+    }
+
+    .messages-page .conversation-list,
+    .messages-page .chat-panel {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border, rgba(140, 150, 190, .2));
+      border-radius: 18px;
+      background: var(--card, rgba(17, 22, 40, .9));
+    }
+
+    .messages-page .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 58px;
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--border, rgba(140, 150, 190, .2));
+      font-weight: 700;
+    }
+
+    .messages-page #conversation-list {
+      max-height: 650px;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .messages-page .conversation-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 5px;
+      text-align: right;
+      color: inherit;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease;
+    }
+
+    .messages-page .conversation-item:hover {
+      background: rgba(80, 110, 255, .09);
+    }
+
+    .messages-page .conversation-item.active {
+      background: rgba(79, 91, 255, .14);
+      border-color: rgba(100, 110, 255, .45);
+    }
+
+    .messages-page .conversation-avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      color: white;
+      font-size: 20px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #246bfe, #8b35ed);
+    }
+
+    .messages-page .conversation-info {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-width: 0;
+      gap: 5px;
+    }
+
+    .messages-page .conversation-info strong,
+    .messages-page .conversation-info small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .messages-page .conversation-info small {
+      opacity: .7;
+      font-size: 12px;
+    }
+
+    .messages-page .chat-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 560px;
+    }
+
+    .messages-page #chat-title {
+      overflow-wrap: anywhere;
+    }
+
+    .messages-page .chat-messages {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 360px;
+      max-height: 560px;
+      overflow-y: auto;
+      padding: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .messages-page .chat-message {
+      align-self: flex-start;
+      max-width: min(78%, 520px);
+      padding: 11px 14px;
+      border: 1px solid var(--border, rgba(140, 150, 190, .2));
+      border-radius: 14px 14px 14px 4px;
+      background: rgba(125, 135, 165, .09);
+      overflow-wrap: anywhere;
+    }
+
+    .messages-page .chat-message.mine {
+      align-self: flex-end;
+      color: white;
+      border-color: transparent;
+      border-radius: 14px 14px 4px 14px;
+      background: linear-gradient(135deg, #2868e8, #6537d9);
+    }
+
+    .messages-page .chat-message-body {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.7;
+    }
+
+    .messages-page .chat-message-time {
+      display: block;
+      margin-top: 6px;
+      opacity: .75;
+      font-size: 11px;
+    }
+
+    .messages-page .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      padding: 24px;
+      text-align: center;
+      opacity: .8;
+    }
+
+    .messages-page .chat-form {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid var(--border, rgba(140, 150, 190, .2));
+    }
+
+    .messages-page .chat-form input {
+      flex: 1;
+      min-width: 0;
+      min-height: 46px;
+      padding: 12px 14px;
+      color: inherit;
+      border: 1px solid var(--border, rgba(140, 150, 190, .25));
+      border-radius: 12px;
+      background: var(--input-bg, rgba(5, 8, 20, .35));
+      outline: none;
+    }
+
+    .messages-page .chat-form input:focus {
+      border-color: #6878ff;
+      box-shadow: 0 0 0 3px rgba(104, 120, 255, .13);
+    }
+
+    .messages-page .chat-form input:disabled,
+    .messages-page .chat-form button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .messages-page .messages-notice {
+      padding: 12px 14px;
+      margin: 12px 0;
+      border-radius: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .messages-page .messages-notice:empty,
+    .messages-page .messages-notice[hidden] {
+      display: none;
+    }
+
+    .messages-page .error-text {
+      color: #ffb5bc;
+      background: rgba(220, 50, 70, .12);
+      border: 1px solid rgba(220, 50, 70, .28);
+    }
+
+    .messages-page .success-text {
+      color: #a8f3d0;
+      background: rgba(20, 170, 115, .1);
+      border: 1px solid rgba(20, 170, 115, .25);
+    }
+
+    .messages-page .muted {
+      opacity: .7;
+      padding: 12px;
+    }
+
+    .messages-page .messages-toolbar .button {
+      min-height: 40px;
+    }
+
+    @media (max-width: 760px) {
+      .messages-page {
+        padding-top: 20px;
+      }
+
+      .messages-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        min-height: auto;
+      }
+
+      .messages-page #conversation-list {
+        max-height: 250px;
+      }
+
+      .messages-page .chat-panel {
+        min-height: 480px;
+      }
+
+      .messages-page .chat-messages {
+        min-height: 280px;
+        max-height: 55vh;
+        padding: 14px;
+      }
+
+      .messages-page .chat-message {
+        max-width: 90%;
+      }
+
+      .messages-page .chat-form {
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .messages-page .chat-form {
+        gap: 7px;
+      }
+
+      .messages-page .chat-form input {
+        padding: 11px 10px;
+      }
+
+      .messages-page .chat-form button {
+        padding-inline: 12px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Header -->
   <header class="topbar">
     <div class="container nav">
-       <a class="brand nova-brand" href="index.html" aria-label="NOVA MARKET - الرئيسية">
+      <a
+        class="brand nova-brand"
+        href="index.html"
+        aria-label="NOVA MARKET - الرئيسية"
+      >
         <img
           class="nova-logo"
           src="https://i.postimg.cc/prbmgQVZ/Logo-N-futuriste-aux-teintes-neon.png"
@@ -26,38 +347,96 @@
           width="48"
           height="48"
         >
+
         <span class="nova-brand-text">
           <strong>NOVA</strong>
           <small>MARKET</small>
         </span>
       </a>
-      <nav class="nav-links">
+
+      <nav class="nav-links" aria-label="القائمة الرئيسية">
         <a href="dashboard.html">لوحة التحكم</a>
         <a href="orders.html">الطلبات</a>
         <a href="index.html">السوق</a>
       </nav>
+
       <div class="nav-actions">
-        <button class="button" type="button" data-theme-toggle>◐</button>
-        <button class="button" type="button" data-signout>خروج</button>
+        <button
+          class="button"
+          type="button"
+          data-theme-toggle
+          aria-label="تغيير المظهر"
+          title="تغيير المظهر"
+        >
+          ◐
+        </button>
+
+        <button
+          class="button"
+          type="button"
+          data-signout
+        >
+          خروج
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="container">
+  <!-- Main -->
+  <main class="container messages-page">
     <section>
-      <h1>المحادثات</h1>
-      <p class="muted">تواصل مع البائعين والمشترين من هنا.</p>
-      <p id="messages-notice" role="status" aria-live="polite"></p>
+      <div class="messages-heading">
+        <h1>المحادثات</h1>
+        <p class="muted">
+          تواصل مع المشترين والبائعين من داخل NOVA MARKET.
+        </p>
+      </div>
+
+      <div class="messages-toolbar">
+        <p class="muted">
+          الرسائل ديالك كتظهر هنا.
+        </p>
+
+        <div class="messages-toolbar-actions">
+          <a class="button" href="orders.html">
+            الطلبات ديالي
+          </a>
+
+          <button
+            class="button"
+            type="button"
+            id="refresh-conversations"
+          >
+            تحديث المحادثات
+          </button>
+        </div>
+      </div>
+
+      <p
+        id="messages-notice"
+        class="messages-notice"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></p>
 
       <div class="messages-layout">
-        <aside class="conversation-list">
-          <div class="chat-header">المحادثات ديالي</div>
+        <!-- Conversations -->
+        <aside
+          class="conversation-list"
+          aria-label="لائحة المحادثات"
+        >
+          <div class="chat-header">
+            <span>المحادثات ديالي</span>
+          </div>
+
           <div id="conversation-list">
-            <p class="muted" style="padding:16px">كنحمّلو المحادثات...</p>
+            <p class="muted">كنحمّلو المحادثات...</p>
           </div>
         </aside>
 
-        <section class="chat-panel">
+        <!-- Chat -->
+        <section class="chat-panel" aria-label="نافذة المحادثة">
           <div class="chat-header" id="chat-title">
             اختار محادثة
           </div>
@@ -66,6 +445,7 @@
             id="chat-messages"
             class="chat-messages"
             aria-live="polite"
+            aria-relevant="additions text"
           >
             <div class="empty-state">
               اختار محادثة من اللائحة باش تشوف الرسائل.
@@ -76,13 +456,20 @@
             <input
               id="message-input"
               name="message"
+              type="text"
               maxlength="3000"
               placeholder="كتب الرسالة ديالك..."
               autocomplete="off"
               aria-label="الرسالة"
               required
+              disabled
             >
-            <button class="button button-primary" type="submit">
+
+            <button
+              class="button button-primary"
+              type="submit"
+              disabled
+            >
               إرسال
             </button>
           </form>
@@ -91,10 +478,42 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container">© NOVA MARKET</div>
+    <div class="container">
+      © NOVA MARKET — جميع الحقوق محفوظة
+    </div>
   </footer>
 
-  <div id="notice" class="notice" role="status"></div>
+  <!-- Notice عام إلا احتاجو common.js -->
+  <div
+    id="notice"
+    class="notice"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <!-- Scripts: حمّل الإعدادات قبل سكريبت المحادثات -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/messages.js"></script>
+
+  <!-- زر تحديث المحادثات -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const refreshButton = document.getElementById(
+        "refresh-conversations"
+      );
+
+      if (!refreshButton) return;
+
+      refreshButton.addEventListener("click", function () {
+        window.location.reload();
+      });
+    });
+  </script>
 </body>
 </html>
