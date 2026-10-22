@@ -401,6 +401,65 @@ html[data-theme="light"] .header-actions button {
   }
 }
 
+.orders-section {
+  margin-top: 24px;
+}
+
+.orders-section h2 {
+  margin-bottom: 8px;
+  font-size: clamp(20px, 3vw, 28px);
+}
+
+.order-card {
+  border: 1px solid rgba(112, 101, 255, 0.25);
+  border-radius: 18px;
+  background: linear-gradient(
+    145deg,
+    rgba(112, 101, 255, 0.08),
+    rgba(36, 200, 255, 0.025)
+  );
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.order-card:hover {
+  border-color: rgba(112, 101, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border, #30303d);
+}
+
+.order-contact-button {
+  background: linear-gradient(135deg, #7065ff, #24a8ff) !important;
+  color: white !important;
+  border: 0 !important;
+  font-weight: 700;
+}
+
+.order-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .order-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .order-actions > * {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
   </style>
 </head>
 
@@ -509,11 +568,38 @@ html[data-theme="light"] .header-actions button {
       <button type="button" data-order-tab="completed">مكتمل</button>
     </div>
 
-    <section id="orders-list" class="orders-list" aria-live="polite">
-      <div class="order-empty">
-        كنحمّلو الطلبات ديالك...
-      </div>
-    </section>
+    
+<section class="orders-section">
+  <div class="orders-heading">
+    <div>
+      <h2>🛍️ المشتريات ديالي</h2>
+      <p class="muted">المنتجات والخدمات اللي طلبتي من البائعين.</p>
+    </div>
+  </div>
+
+  <section id="orders-list" class="orders-list" aria-live="polite">
+    <div class="order-empty">كنحمّلو المشتريات ديالك...</div>
+  </section>
+</section>
+
+<section class="orders-section" style="margin-top: 38px;">
+  <div class="orders-heading">
+    <div>
+      <h2>📦 الطلبات اللي تشراو من عندي</h2>
+      <p class="muted">
+        هنا كيبانو طلبات الزبناء ديالك، وتقدر تتابع الحالة وتتواصل معاهم.
+      </p>
+    </div>
+  </div>
+
+  <section
+    id="seller-orders-list"
+    class="orders-list"
+    aria-live="polite"
+  >
+    <div class="order-empty">كنحمّلو طلبات الزبناء...</div>
+  </section>
+</section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
