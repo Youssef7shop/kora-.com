@@ -263,10 +263,21 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-config.js"></script>
-  <script src="js/role-redirect.js"></script>
-  <script src="js/common.js"></script>
-  <script src="js/admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+
+<script>
+  if (!window.novaClient?.auth) {
+    console.error(
+      "[NOVA ADMIN] Supabase ما تهيّأش. راجع js/supabase-config.js"
+    );
+  } else {
+    console.log("[NOVA ADMIN] Supabase متصل.");
+  }
+</script>
+
+<script defer src="js/common.js"></script>
+<script defer src="js/admin.js"></script>
+
 </body>
 </html>
