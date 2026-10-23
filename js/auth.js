@@ -181,10 +181,32 @@
         googleButton.disabled = true;
 
         try {
-          const { error } = await client.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: window.location.origin + "/dashboard.html"
+          const { data, error } = await client.auth.signInWithPassword({
+  email,
+  password
+});
+
+if (error) throw error;
+
+const user = data.user;
+
+const { data: profile, error: profileError } = await client
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
+  .maybeSingle();
+
+if (profileError) {
+  console.error("Profile role lookup failed:", profileError);
+  showMessage("تعذر التحقق من صلاحيات الحساب. تواصل مع الإدارة.");
+  return;
+}
+
+if (profile?.role === "ADMIN" || profile?.role === "SUPER_ADMIN") {
+  window.location.href = "/admin";
+} else {
+  window.location.href = "/dashboard";
+}
             }
           });
 
