@@ -1,4 +1,3 @@
-// js/role-redirect.js
 (function () {
   "use strict";
 
