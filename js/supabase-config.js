@@ -1,3 +1,4 @@
+// js/supabase-config.js
 (function () {
   "use strict";
 
@@ -7,26 +8,20 @@
   const SUPABASE_KEY =
     "sb_publishable_ApmI13vCQ93xxioPg7fMxA_jXVgTihi";
 
-  console.log("[NOVA] كنبدأو إعداد Supabase...");
-
-  function initializeSupabase() {
-    if (!window.supabase) {
+  function initSupabase() {
+    if (
+      !window.supabase ||
+      typeof window.supabase.createClient !== "function"
+    ) {
       console.error(
-        "[NOVA] مكتبة Supabase ما تحمّلاتش. راجع CDN."
+        "[NOVA] Supabase library not loaded."
       );
       return;
     }
 
-    if (typeof window.supabase.createClient !== "function") {
-      console.error(
-        "[NOVA] createClient ما موجوداش فمكتبة Supabase."
-      );
-      return;
-    }
-
-    if (window.novaClient) {
+    // ما ننشؤوش اتصال ثاني إلا كان موجود
+    if (window.novaClient?.auth) {
       window.supabaseClient = window.novaClient;
-      console.log("[NOVA] الاتصال موجود من قبل.");
       return;
     }
 
@@ -39,14 +34,14 @@
       window.novaClient = client;
       window.supabaseClient = client;
 
-      console.log("[NOVA] Supabase تهيّأ بنجاح.");
+      console.log("[NOVA] Supabase initialized successfully.");
     } catch (error) {
       console.error(
-        "[NOVA] فشل إنشاء الاتصال:",
+        "[NOVA] Supabase initialization failed:",
         error
       );
     }
   }
 
-  initializeSupabase();
+  initSupabase();
 })();
