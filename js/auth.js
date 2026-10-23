@@ -174,48 +174,24 @@
         }
       });
     }
+// تسجيل الدخول بواسطة Google
+if (googleButton) {
+  googleButton.addEventListener("click", async function () {
+    googleButton.disabled = true;
 
-    // تسجيل الدخول بواسطة Google
-    if (googleButton) {
-      googleButton.addEventListener("click", async function () {
-        googleButton.disabled = true;
-
-        try {
-          const { data, error } = await client.auth.signInWithPassword({
-  email,
-  password
-});
-
-if (error) throw error;
-
-const user = data.user;
-
-const { data: profile, error: profileError } = await client
-  .from("profiles")
-  .select("role")
-  .eq("id", user.id)
-  .maybeSingle();
-
-if (profileError) {
-  console.error("Profile role lookup failed:", profileError);
-  showMessage("تعذر التحقق من صلاحيات الحساب. تواصل مع الإدارة.");
-  return;
-}
-
-if (profile?.role === "ADMIN" || profile?.role === "SUPER_ADMIN") {
-  window.location.href = "/admin";
-} else {
-  window.location.href = "/dashboard";
-}
-            }
-          });
-
-          if (error) throw error;
-        } catch (error) {
-          showMessage(friendlyError(error));
-          googleButton.disabled = false;
+    try {
+      const { error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/dashboard.html"
         }
       });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      showMessage(friendlyError(error));
+      googleButton.disabled = false;
     }
   });
-})();
+}
