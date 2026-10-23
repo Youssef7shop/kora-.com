@@ -66,13 +66,6 @@
       return text || "وقع خطأ غير متوقع. عاود المحاولة.";
     }
 
-    if (!client && (registerForm || loginForm || googleButton)) {
-      showMessage(
-        "Supabase ما متهيّأش. راجع js/supabase-config.js."
-      );
-      return;
-    }
-
     // إنشاء حساب جديد
     if (registerForm) {
       registerForm.addEventListener("submit", async function (event) {
